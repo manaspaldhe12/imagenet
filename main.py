@@ -58,7 +58,7 @@ TRAIN_MODEL = args.train_model
 
 # resize because the image sizes are different...
 imagenet_transforms = transforms.Compose([
-    transforms.Resize(256)
+    transforms.Resize((256,256))
 ])
 
 # Load the Training Data
@@ -110,7 +110,7 @@ class SimpleNN(nn.Module):
         return x
 
 
-model = SimpleNN(input_size=28*28, hidden_size=18, output_size=1000)
+model = SimpleNN(input_size=256*256, hidden_size=18, output_size=1000)
 
 model_loaded = False
 if USE_LATEST_MODEL:
@@ -131,9 +131,9 @@ criterion = nn.MSELoss(reduction='sum')
 
 if TRAIN_MODEL or not model_loaded:
     model.train()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.1)
 
-    for epoch in range(10): # Loop over the entire dataset 3 times
+    for epoch in range(1000):
         running_loss = 0.0
         for images, labels in train_loader:
             # Flatten images from (batch_size, 1, 28, 28) to (batch_size, 784)
@@ -148,6 +148,13 @@ if TRAIN_MODEL or not model_loaded:
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
+        #if epoch%100 == 0:
+        #   kear
+        # I was about to do rate change.. but thanks to AI realized that adam is already adaptive...
+        # what should I experiment with then... what will be different from mnist if I just copy paste....
+        # things like image transformations etc I could try with mnist too (not rotation lol else 6 becomes 9)
+        # but at least resnet or conv layers...
+        # let me think what I can do with Imageneet that I cannot with mnist in terms of learning...
             
         logging.info(f"Epoch {epoch+1} finished. Avg Loss: {running_loss/len(train_loader):.4f}")
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
